@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digital-twin-voice-agent"
+version = "0.1.0"
+description = "A grounded personal voice agent built with LiveKit Agents"
+readme = "README.md"
+requires-python = ">=3.10,<3.15"
+dependencies = [
+    "livekit-agents~=1.8",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+noise-cancellation = ["livekit-plugins-ai-coustics~=0.3"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "B", "A", "C4", "UP", "SIM", "RUF"]
+ignore = ["E501"]
