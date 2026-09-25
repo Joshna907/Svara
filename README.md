@@ -120,12 +120,14 @@ These resume it:
 - “Start again.”
 
 While paused, normal questions receive only a short reminder to say “resume.”
-The recognizer checks the complete utterance, so a sentence such as “I paused my
-project last year” does not change the conversation state.
+If pause interrupted an answer, resume continues from the spoken stopping point
+without restarting the answer. The recognizer accepts a repeated command such as
+“pause, pause” while still avoiding normal phrases such as “explain the pause and
+resume design.”
 
-When testing without headphones, set `ALLOW_INTERRUPTION=false` in `.env.local`
-so audio from the laptop speakers does not interrupt the agent through the
-microphone. Set it back to `true` for the hosted demo to enable natural barge-in.
+The hosted demo requires `ALLOW_INTERRUPTION=true`. Browser echo cancellation
+reduces speaker feedback while VAD interruption lets a one-word “pause” stop
+playback quickly.
 
 Natural interruption is separate: if a visitor speaks while the agent is
 answering, LiveKit stops the current speech and listens to the visitor.

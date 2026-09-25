@@ -41,7 +41,6 @@ def _project_path(raw_path: str) -> Path:
     return path if path.is_absolute() else PROJECT_ROOT / path
 
 
-AGENT_NAME = os.getenv("LIVEKIT_AGENT_NAME", "digital-twin")
 TWIN_NAME = os.getenv("TWIN_NAME", "the profile owner")
 PROFILE_PATH = _project_path(os.getenv("PROFILE_PATH", "knowledge/personal_profile.md"))
 
@@ -72,6 +71,7 @@ class DigitalTwinAgent(Agent):
         super().__init__(instructions=BASE_INSTRUCTIONS.format(name=twin_name))
         self._knowledge = knowledge
         self._paused = False
+        self._resume_interrupted_reply = False
 
     @property
     def paused(self) -> bool:
@@ -84,15 +84,23 @@ class DigitalTwinAgent(Agent):
         command = detect_command(transcript)
 
         if command is ConversationCommand.PAUSE:
+            # A normal user turn should already have interrupted playback. Force
+            # the stop as a second line of defence so a spoken pause command is
+            # never queued behind the answer it is meant to stop.
+            await self.session.interrupt(force=True)
+            self._resume_interrupted_reply = (
+                self._resume_interrupted_reply
+                or _latest_assistant_message_was_interrupted(turn_ctx)
+            )
             if self._paused:
                 await self.session.say(
-                    "The conversation is already paused. Say resume when you're ready.",
+                    "Still paused.",
                     add_to_chat_ctx=False,
                 )
             else:
                 self._paused = True
                 await self.session.say(
-                    "Okay, I've paused the conversation. Say resume when you're ready.",
+                    "Paused.",
                     add_to_chat_ctx=False,
                 )
             raise StopResponse()
@@ -100,10 +108,23 @@ class DigitalTwinAgent(Agent):
         if command is ConversationCommand.RESUME:
             if self._paused:
                 self._paused = False
-                await self.session.say(
-                    "We're back. What would you like to know?",
-                    add_to_chat_ctx=False,
-                )
+                if self._resume_interrupted_reply:
+                    self._resume_interrupted_reply = False
+                    self.session.generate_reply(
+                        chat_ctx=turn_ctx,
+                        allow_interruptions=True,
+                        instructions=(
+                            "The user paused your previous answer and has now said resume. "
+                            "Continue from immediately after the last words in the most recent "
+                            "interrupted assistant message. Do not restart or summarize the "
+                            "answer, and do not repeat information already spoken."
+                        ),
+                    )
+                else:
+                    await self.session.say(
+                        "We're back. What would you like to know?",
+                        add_to_chat_ctx=False,
+                    )
             else:
                 await self.session.say(
                     "The conversation is already active. What would you like to know?",
@@ -133,10 +154,19 @@ class DigitalTwinAgent(Agent):
         )
 
 
+def _latest_assistant_message_was_interrupted(turn_ctx: ChatContext) -> bool:
+    """Return whether the latest assistant answer was cut off during playback."""
+
+    for message in reversed(turn_ctx.messages()):
+        if message.role == "assistant":
+            return message.interrupted and bool(message.text_content)
+    return False
+
+
 server = AgentServer()
 
 
-@server.rtc_session(agent_name=AGENT_NAME)
+@server.rtc_session()
 async def digital_twin(ctx: agents.JobContext) -> None:
     knowledge = KnowledgeBase.from_markdown(PROFILE_PATH)
 
@@ -154,6 +184,14 @@ async def digital_twin(ctx: agents.JobContext) -> None:
             turn_detection=inference.TurnDetector(),
             interruption={
                 "enabled": _env_bool("ALLOW_INTERRUPTION", True),
+                # VAD reacts to a one-word command much faster than adaptive
+                # backchannel classification. Browser echo cancellation keeps
+                # the hosted experience from hearing its own speaker output.
+                "mode": "vad",
+                "min_duration": 0.15,
+                "min_words": 0,
+                "resume_false_interruption": False,
+                "false_interruption_timeout": None,
             },
         ),
     )

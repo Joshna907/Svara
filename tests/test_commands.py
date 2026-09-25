@@ -12,6 +12,8 @@ from digital_twin.commands import ConversationCommand, detect_command
         "stop listening",
         "hold on",
         "pause for a moment",
+        "pause pause",
+        "Pause. That's enough for now.",
     ],
 )
 def test_detects_pause_commands(utterance: str) -> None:
@@ -25,6 +27,8 @@ def test_detects_pause_commands(utterance: str) -> None:
         "Please resume the conversation.",
         "continue",
         "you can continue now",
+        "resume resume please",
+        "Resume. Continue with the answer.",
         "start again",
     ],
 )
@@ -40,8 +44,8 @@ def test_detects_resume_commands(utterance: str) -> None:
         "Continue explaining the project architecture",
         "What is resume-driven development?",
         "What did you do next?",
+        "Explain the pause and resume design",
     ],
 )
 def test_does_not_trigger_on_normal_questions(utterance: str) -> None:
     assert detect_command(utterance) is None
-

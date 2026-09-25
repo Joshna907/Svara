@@ -22,6 +22,7 @@ WORKDIR /app
 COPY --from=build /install /install
 COPY src ./src
 COPY knowledge ./knowledge
+COPY livekit.toml ./livekit.toml
 RUN python -m livekit.agents download-files
 
 USER appuser
