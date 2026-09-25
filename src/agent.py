@@ -46,14 +46,17 @@ PROFILE_PATH = _project_path(os.getenv("PROFILE_PATH", "knowledge/personal_profi
 
 
 BASE_INSTRUCTIONS = """
-You are the digital representative of {name}. Speak in the first person as {name},
-while being honest that you are an AI representative if the user asks directly.
+You are Svara, the AI twin of {name}. Introduce that relationship once at the
+beginning of the conversation. After the introduction, speak naturally in the
+first person using I, me, and my. Do not repeatedly say {name}'s name or refer to
+{name} in the third person. If asked directly, be honest that you are an AI twin.
 
 Ground every factual claim about {name} in the PROFILE CONTEXT supplied with the
 current turn. Never invent employment, education, projects, dates, achievements,
 skills, links, or personal preferences. If the supplied context does not contain
-the answer, say that the information is not in your profile yet and invite the
-visitor to ask something else.
+the answer, simply say "I don't remember that" or "I can't answer that." Never
+mention a profile, profile context, profile owner, knowledge base, or redirect the
+unknown question into a statement about {name}.
 
 This is a spoken conversation. Keep most answers to two to five sentences, use
 plain conversational language, and do not read Markdown syntax aloud. Explain
@@ -143,13 +146,21 @@ class DigitalTwinAgent(Agent):
             raise StopResponse()
 
         profile_context = self._knowledge.context_for(transcript)
+        if not profile_context:
+            await self.session.say(
+                "I don't remember that well enough to answer it.",
+                add_to_chat_ctx=False,
+            )
+            raise StopResponse()
+
         turn_ctx.add_message(
             role="assistant",
             content=(
                 "PROFILE CONTEXT FOR THIS TURN:\n"
                 f"{profile_context}\n\n"
-                "Use only this context for factual claims about the profile owner. "
-                "If it is insufficient, say that clearly."
+                "Answer as Svara in the first person using I, me, and my. "
+                "Do not refer to Jothsana in the third person. If this context "
+                "does not answer the question, use the short first-person fallback."
             ),
         )
 
@@ -177,8 +188,8 @@ async def digital_twin(ctx: agents.JobContext) -> None:
         ),
         llm=inference.LLM(model=os.getenv("LLM_MODEL", "google/gemma-4-31b-it")),
         tts=inference.TTS(
-            model=os.getenv("TTS_MODEL", "fishaudio/s2.1-pro"),
-            voice=os.getenv("TTS_VOICE", "fa4c9eb3dccc4806b382b40d61c6b10a"),
+            model=os.getenv("TTS_MODEL", "deepgram/aura-2"),
+            voice=os.getenv("TTS_VOICE", "athena"),
         ),
         turn_handling=TurnHandlingOptions(
             turn_detection=inference.TurnDetector(),
@@ -223,8 +234,8 @@ async def digital_twin(ctx: agents.JobContext) -> None:
 
     await session.generate_reply(
         instructions=(
-            f"Greet the visitor as {TWIN_NAME}'s AI representative in one or two "
-            "sentences. Invite them to ask about the profile owner's background or work."
+            f"Say: 'Hi, I'm Svara, {TWIN_NAME}'s AI twin. You can ask me about my "
+            "background, work, or projects.' Keep this introduction to two short sentences."
         )
     )
 

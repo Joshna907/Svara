@@ -48,7 +48,19 @@ def test_broad_self_introduction_uses_summary(profile: Path) -> None:
     assert "AI engineering student" in context
 
 
+@pytest.mark.parametrize(
+    "query",
+    [
+        "What is your favourite restaurant?",
+        "What is the capital of France?",
+        "Do you own a dog?",
+    ],
+)
+def test_unrelated_question_returns_no_profile_context(profile: Path, query: str) -> None:
+    knowledge = KnowledgeBase.from_markdown(profile)
+    assert knowledge.context_for(query) == ""
+
+
 def test_missing_profile_fails_clearly(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="Personal profile not found"):
         KnowledgeBase.from_markdown(tmp_path / "missing.md")
-

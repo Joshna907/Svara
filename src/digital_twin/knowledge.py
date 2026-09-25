@@ -39,6 +39,13 @@ _QUERY_EXPANSIONS = {
     "education": {"college", "university", "degree", "study"},
 }
 
+_BROAD_PROFILE_PATTERNS = (
+    r"(?:please\s+)?introduce yourself",
+    r"tell me about yourself",
+    r"who are you",
+    r"what should i know about you",
+)
+
 
 def _tokens(text: str) -> set[str]:
     values = {match.group(0).casefold() for match in _TOKEN_RE.finditer(text)}
@@ -47,6 +54,11 @@ def _tokens(text: str) -> set[str]:
     for value in values:
         expanded.update(_QUERY_EXPANSIONS.get(value, set()))
     return expanded
+
+
+def _is_broad_profile_query(query: str) -> bool:
+    normalized = " ".join(query.casefold().strip().split())
+    return any(re.fullmatch(pattern, normalized) for pattern in _BROAD_PROFILE_PATTERNS)
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,9 +119,10 @@ class KnowledgeBase:
         ranked.sort(key=lambda item: (item[0], item[1]), reverse=True)
         positive = [section for score, _, section in ranked if score > 0]
 
-        # Broad prompts such as "tell me about yourself" may have no lexical
-        # overlap. The first section is intentionally the profile summary.
-        if not positive:
+        # Only genuine self-introduction prompts fall back to the summary.
+        # Unrelated questions return no context so the agent can decline
+        # instead of forcing every topic back to the profile owner.
+        if not positive and _is_broad_profile_query(query):
             return self.sections[:1]
         return positive[:limit]
 

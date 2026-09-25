@@ -178,7 +178,7 @@ Deploy the `frontend/` directory to Vercel. Add `LIVEKIT_URL`,
 1. The agent greets the visitor and identifies itself as an AI representative.
 2. “Tell me about yourself” is answered from the profile summary.
 3. A project question retrieves the correct project section.
-4. An unknown fact produces an honest “not in my profile” response.
+4. An unknown fact produces a short first-person “I don’t remember” response.
 5. Speaking during a long answer interrupts the agent cleanly.
 6. “Pause” suppresses normal answers until “resume” is spoken.
 7. “I paused my project last year” does not pause the agent.
