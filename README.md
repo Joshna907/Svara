@@ -125,9 +125,10 @@ without restarting the answer. The recognizer accepts a repeated command such as
 “pause, pause” while still avoiding normal phrases such as “explain the pause and
 resume design.”
 
-The hosted demo requires `ALLOW_INTERRUPTION=true`. Browser echo cancellation
-reduces speaker feedback while VAD interruption lets a one-word “pause” stop
-playback quickly.
+The hosted demo requires `ALLOW_INTERRUPTION=true`. Browser echo cancellation,
+noise suppression, server-side audio enhancement, and a minimum speech duration
+reduce speaker feedback and false transcripts while still allowing a one-word
+“pause” to stop playback.
 
 Natural interruption is separate: if a visitor speaks while the agent is
 answering, LiveKit stops the current speech and listens to the visitor.

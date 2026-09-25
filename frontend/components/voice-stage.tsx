@@ -56,6 +56,13 @@ export function VoiceStage({ connection, isStarting, error, onStart, onDisconnec
       connect
       audio
       video={false}
+      options={{
+        audioCaptureDefaults: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      }}
       onDisconnected={onDisconnected}
       onError={(roomError) => console.error("LiveKit room error", roomError)}
     >

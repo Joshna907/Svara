@@ -182,16 +182,19 @@ async def digital_twin(ctx: agents.JobContext) -> None:
         ),
         turn_handling=TurnHandlingOptions(
             turn_detection=inference.TurnDetector(),
+            endpointing={
+                "min_delay": 0.3,
+                "max_delay": 1.2,
+            },
             interruption={
                 "enabled": _env_bool("ALLOW_INTERRUPTION", True),
-                # VAD reacts to a one-word command much faster than adaptive
-                # backchannel classification. Browser echo cancellation keeps
-                # the hosted experience from hearing its own speaker output.
+                # Keep a one-word command responsive without treating every
+                # click, breath, or brief noise as a real interruption.
                 "mode": "vad",
-                "min_duration": 0.15,
-                "min_words": 0,
-                "resume_false_interruption": False,
-                "false_interruption_timeout": None,
+                "min_duration": 0.4,
+                "min_words": 1,
+                "resume_false_interruption": True,
+                "false_interruption_timeout": 1.0,
             },
         ),
     )
