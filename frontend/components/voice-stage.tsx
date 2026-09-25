@@ -9,7 +9,7 @@ import {
   useTranscriptions,
   useVoiceAssistant,
 } from "@livekit/components-react";
-import { Microphone, PhoneDisconnect, WarningCircle } from "@phosphor-icons/react";
+import { Microphone, PhoneDisconnect, WarningCircle, Waveform } from "@phosphor-icons/react";
 import { Track } from "livekit-client";
 import { useEffect, useState } from "react";
 
@@ -32,18 +32,26 @@ export function VoiceStage({ connection, isStarting, error, onStart, onDisconnec
   if (!connection) {
     return (
       <div className="voice-stage voice-stage-idle">
-        <div className="connection-state"><span /> Ready</div>
+        <div className="stage-topline">
+          <span className="stage-label">Svara voice studio</span>
+          <div className="connection-state"><span /> Ready</div>
+        </div>
         <VoiceOrb state={isStarting ? "connecting" : error ? "error" : "idle"} />
         <div className="voice-heading">
           <h2>{isStarting ? "Preparing your room" : error ? "Something needs attention" : "Ready when you are"}</h2>
           <p>{isStarting ? "Connecting securely to LiveKit" : error || "Allow microphone access, then speak naturally."}</p>
         </div>
-        <button className="mic-button" type="button" onClick={onStart} disabled={isStarting} aria-label="Start conversation">
-          {error ? <WarningCircle weight="bold" /> : <Microphone weight="bold" />}
-        </button>
-        <div className="stage-empty">
-          <p>Try asking</p>
-          <strong>“Tell me about a project you&apos;re proud of.”</strong>
+        <div className="voice-prompt-dock">
+          <div className="dock-prompt">
+            <span>Try asking</span>
+            <strong>Tell me about a project you&apos;re proud of.</strong>
+            <div className="dock-signal" aria-hidden="true">
+              {Array.from({ length: 42 }, (_, index) => <i key={index} />)}
+            </div>
+          </div>
+          <button className="dock-voice-button" type="button" onClick={onStart} disabled={isStarting} aria-label="Start conversation">
+            {error ? <WarningCircle weight="bold" /> : <Waveform weight="bold" />}
+          </button>
         </div>
       </div>
     );
@@ -85,7 +93,7 @@ function ConnectedVoiceStage() {
     disconnected: { title: "Joining the room", detail: "The agent will be here in a moment." },
     connecting: { title: "Connecting", detail: "Opening a secure audio session." },
     initializing: { title: "Getting ready", detail: "Loading Svara's knowledge profile." },
-    listening: { title: "I'm listening", detail: "Ask Svara about Jothsana's work." },
+    listening: { title: "I'm listening", detail: "Ask me about my work, decisions, or experience." },
     thinking: { title: "Thinking", detail: "Finding the most relevant answer." },
     speaking: { title: "Speaking", detail: "You can pause the agent with your voice." },
   };
@@ -99,7 +107,10 @@ function ConnectedVoiceStage() {
 
   return (
     <div className={`voice-stage voice-stage-live state-${state}`}>
-      <div className="connection-state is-live"><span /> Connected</div>
+      <div className="stage-topline">
+        <span className="stage-label">Live conversation</span>
+        <div className="connection-state is-live"><span /> Connected</div>
+      </div>
       <div className="live-visualizer" aria-label={`Agent is ${state}`}>
         <div className="orb-rings" aria-hidden="true"><i /><i /><i /></div>
         <BarVisualizer state={state} trackRef={audioTrack} barCount={7} />
@@ -126,7 +137,7 @@ function ConnectedVoiceStage() {
             const isAgent = identity.includes("agent") || identity.includes("digital-twin");
             return (
               <div className={`transcript-line ${isAgent ? "from-agent" : "from-user"}`} key={item.id || `${item.text}-${index}`}>
-                <small>{isAgent ? "Svara · Jothsana's voice twin" : "You"}</small>
+                <small>{isAgent ? "Svara" : "You"}</small>
                 <p>{item.text}</p>
               </div>
             );

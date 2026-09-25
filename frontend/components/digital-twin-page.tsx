@@ -12,7 +12,7 @@ import {
   Lightning,
   Microphone,
   Robot,
-  Sparkle,
+  Waveform,
   Wrench,
 } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
@@ -89,7 +89,7 @@ export function DigitalTwinPage() {
     <main>
       <header className="site-nav">
         <a className="brand" href="#top" aria-label="Svara by Jothsana, home">
-          <span className="brand-mark">SV</span>
+          <span className="brand-mark"><Waveform weight="bold" aria-hidden="true" /></span>
           <span>Svara <em>by Jothsana</em></span>
         </a>
         <nav aria-label="Primary navigation">
@@ -106,9 +106,9 @@ export function DigitalTwinPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="eyebrow">Svara · Live voice portfolio</p>
-          <h1>Meet the engineer. Ask Svara.</h1>
-          <p className="hero-summary">A real-time voice conversation with Svara about Jothsana&apos;s work, decisions, and experience.</p>
+          <p className="eyebrow">A live voice portfolio by Jothsana Waikar</p>
+          <h1>A portfolio that speaks for itself.</h1>
+          <p className="hero-summary">Meet the engineer through a real-time conversation about the work, decisions, and experience behind it.</p>
           <div className="hero-actions">
             <button className="button button-primary" type="button" onClick={startConversation} disabled={isStarting}>
               <Microphone weight="bold" aria-hidden="true" />
@@ -121,16 +121,16 @@ export function DigitalTwinPage() {
           <div className="proof-points" aria-label="Project highlights">
             <div>
               <HeadCircuit aria-hidden="true" />
-              <strong>Talk naturally</strong>
-              <span>Ask about projects, skills, or decisions</span>
+              <strong>Natural conversation</strong>
+              <span>Ask, interrupt, pause, and continue</span>
             </div>
             <div>
               <Code aria-hidden="true" />
-              <strong>Real experience</strong>
-              <span>Grounded in Jothsana&apos;s own profile</span>
+              <strong>Grounded answers</strong>
+              <span>Based only on real work and experience</span>
             </div>
             <div>
-              <Sparkle aria-hidden="true" />
+              <Waveform aria-hidden="true" />
               <strong>Built end to end</strong>
               <span>Voice AI from backend to interface</span>
             </div>
@@ -190,7 +190,7 @@ export function DigitalTwinPage() {
               <p>What did you build?</p>
             </div>
             <div className="preview-message preview-agent">
-              <small>Svara · Jothsana&apos;s voice twin</small>
+              <small>Svara</small>
               <p>I built a real-time voice portfolio that connects low-latency conversation to knowledge about my actual work.</p>
             </div>
             <button className="preview-action" type="button" onClick={startConversation}>
@@ -269,8 +269,8 @@ export function DigitalTwinPage() {
       </section>
 
       <footer className="site-footer shell">
-        <a className="brand" href="#top" aria-label="Svara by Jothsana, home"><span className="brand-mark">SV</span><span>Svara <em>by Jothsana</em></span></a>
-        <span>Built with LiveKit</span>
+        <a className="brand" href="#top" aria-label="Svara by Jothsana, home"><span className="brand-mark"><Waveform weight="bold" aria-hidden="true" /></span><span>Svara <em>by Jothsana</em></span></a>
+        <span>Designed and engineered by Jothsana Waikar</span>
       </footer>
     </main>
   );
