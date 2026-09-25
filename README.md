@@ -170,6 +170,24 @@ Deploy the `frontend/` directory to Vercel. Add `LIVEKIT_URL`,
 `NEXT_PUBLIC_GITHUB_URL` in the Vercel project settings. Keep
 `LIVEKIT_API_SECRET` server-only and never prefix it with `NEXT_PUBLIC_`.
 
+### Deploy both services on Render
+
+This repository includes `render.yaml`, a Render Blueprint that creates two
+services in Singapore: `svara-agent` (the persistent LiveKit background worker)
+and `svara-web` (the public Next.js site). In Render, choose **New +** →
+**Blueprint**, connect this GitHub repository, and select the `main` branch.
+
+When prompted, provide these values for both services:
+
+- `LIVEKIT_URL`
+- `LIVEKIT_API_KEY`
+- `LIVEKIT_API_SECRET`
+
+The Blueprint supplies the safe non-secret defaults, including the agent name
+`digital-twin` and the public GitHub link. Do not enter credentials in
+`render.yaml` or commit `.env.local`. After both services are live, open the
+`svara-web` URL, allow microphone access, and begin a conversation.
+
 ## Manual acceptance checklist
 
 1. The agent greets the visitor and identifies itself as an AI representative.
