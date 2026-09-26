@@ -146,6 +146,10 @@ class DigitalTwinAgent(Agent):
         if not transcript:
             raise StopResponse()
 
+        is_identity_query = self._knowledge.is_identity_query(
+            transcript,
+            owner_name=self._twin_name,
+        )
         profile_context = self._knowledge.context_for(
             transcript,
             owner_name=self._twin_name,
@@ -157,6 +161,16 @@ class DigitalTwinAgent(Agent):
             )
             raise StopResponse()
 
+        response_guidance = (
+            "Give a natural, comprehensive first-person overview covering my "
+            "background, education, strongest skills, main projects, relevant "
+            "experience, achievements, and working style. Use about six to nine "
+            "spoken sentences, then invite the listener to explore any area in "
+            "more detail. Do not read contact links unless asked."
+            if is_identity_query
+            else "Answer the specific question directly and concisely."
+        )
+
         turn_ctx.add_message(
             role="assistant",
             content=(
@@ -164,7 +178,8 @@ class DigitalTwinAgent(Agent):
                 f"{profile_context}\n\n"
                 "Answer as Svara in the first person using I, me, and my. "
                 "Do not refer to Jothsana in the third person. If this context "
-                "does not answer the question, use the short first-person fallback."
+                "does not answer the question, use the short first-person fallback. "
+                f"{response_guidance}"
             ),
         )
 

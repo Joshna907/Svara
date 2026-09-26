@@ -177,8 +177,11 @@ class KnowledgeBase:
         limit: int = 3,
         owner_name: str | None = None,
     ) -> str:
-        if _is_broad_profile_query(query) or _is_owner_introduction_query(
-            query, owner_name
-        ):
+        if self.is_identity_query(query, owner_name=owner_name):
             return "\n\n".join(section.rendered for section in self.sections)
         return "\n\n".join(section.rendered for section in self.search(query, limit=limit))
+
+    def is_identity_query(self, query: str, *, owner_name: str | None = None) -> bool:
+        return _is_broad_profile_query(query) or _is_owner_introduction_query(
+            query, owner_name
+        )
