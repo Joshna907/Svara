@@ -63,6 +63,9 @@ def test_broad_self_introduction_uses_full_profile(profile: Path, query: str) ->
     [
         "Tell me more about Jothsana Waikar",
         "Tell me more about Jyotsana Vaikar.",
+        "Okay, tell me about Jyotsna Vaikar.",
+        "Tell me more about Jutsuna.",
+        "Tell me about Joshna Waikar",
         "Who is Jotsana Waikar?",
     ],
 )

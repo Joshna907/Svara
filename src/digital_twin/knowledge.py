@@ -83,6 +83,7 @@ def _is_owner_introduction_query(query: str, owner_name: str | None) -> bool:
         return False
 
     normalized = _normalize_query(query)
+    normalized = re.sub(r"^(?:(?:okay|ok|so|well|yeah)\s+)+", "", normalized)
     requested_name = next(
         (
             normalized.removeprefix(prefix).strip()
@@ -99,10 +100,18 @@ def _is_owner_introduction_query(query: str, owner_name: str | None) -> bool:
     if not expected_parts or not requested_parts:
         return False
 
-    return all(
-        any(SequenceMatcher(None, expected, actual).ratio() >= 0.72 for actual in requested_parts)
-        for expected in expected_parts
+    first_name_similarity = max(
+        SequenceMatcher(None, expected_parts[0], actual).ratio()
+        for actual in requested_parts
     )
+    if len(requested_parts) == 1:
+        return first_name_similarity >= 0.6
+
+    last_name_similarity = max(
+        SequenceMatcher(None, expected_parts[-1], actual).ratio()
+        for actual in requested_parts
+    )
+    return first_name_similarity >= 0.6 and last_name_similarity >= 0.72
 
 
 @dataclass(frozen=True, slots=True)
@@ -185,3 +194,11 @@ class KnowledgeBase:
         return _is_broad_profile_query(query) or _is_owner_introduction_query(
             query, owner_name
         )
+
+    def is_owner_introduction_query(
+        self,
+        query: str,
+        *,
+        owner_name: str | None = None,
+    ) -> bool:
+        return _is_owner_introduction_query(query, owner_name)

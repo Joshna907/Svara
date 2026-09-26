@@ -150,6 +150,10 @@ class DigitalTwinAgent(Agent):
             transcript,
             owner_name=self._twin_name,
         )
+        is_owner_introduction = self._knowledge.is_owner_introduction_query(
+            transcript,
+            owner_name=self._twin_name,
+        )
         profile_context = self._knowledge.context_for(
             transcript,
             owner_name=self._twin_name,
@@ -161,8 +165,11 @@ class DigitalTwinAgent(Agent):
             )
             raise StopResponse()
 
+        introduction_opening = (
+            "Begin naturally with: 'That's me.' " if is_owner_introduction else ""
+        )
         response_guidance = (
-            "Give a natural, comprehensive first-person overview covering my "
+            f"{introduction_opening}Give a natural, comprehensive first-person overview covering my "
             "background, education, strongest skills, main projects, relevant "
             "experience, achievements, and working style. Use about six to nine "
             "spoken sentences, then invite the listener to explore any area in "
