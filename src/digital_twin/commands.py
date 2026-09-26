@@ -15,6 +15,11 @@ class ConversationCommand(str, Enum):
     RESUME = "resume"
 
 
+class SocialIntent(str, Enum):
+    CLOSING = "closing"
+    THANKS = "thanks"
+
+
 _PAUSE_PATTERNS = (
     r"(?:please\s+)?pause",
     r"(?:please\s+)?pause(?:\s+pause){1,2}(?:\s+please)?",
@@ -32,6 +37,18 @@ _RESUME_PATTERNS = (
     r"(?:please\s+)?continue\s+(?:the\s+)?conversation",
     r"(?:you\s+can\s+)?start\s+again",
     r"(?:you\s+can\s+)?continue\s+now",
+)
+
+_CLOSING_PATTERNS = (
+    r"(?:(?:thanks|thank you)[,\s]+)?(?:it (?:was|has been) )?(?:really )?(?:nice|good|great|lovely) (?:talking|chatting|speaking) (?:to|with) you",
+    r"(?:(?:thanks|thank you)[,\s]+)?(?:(?:it|that) (?:was|has been) )?a (?:really )?(?:nice|good|great|lovely) (?:talk|chat|conversation)",
+    r"(?:thanks|thank you) for (?:the|this|our) (?:talk|chat|conversation)",
+    r"(?:goodbye|bye|bye bye|see you|talk to you later)",
+)
+
+_THANKS_PATTERNS = (
+    r"(?:thanks|thank you|thank you very much|thanks a lot)",
+    r"(?:thanks|thank you) for (?:your time|your help|the help)",
 )
 
 
@@ -59,4 +76,15 @@ def detect_command(text: str) -> ConversationCommand | None:
             return ConversationCommand.PAUSE
         if any(re.fullmatch(pattern, normalized) for pattern in _RESUME_PATTERNS):
             return ConversationCommand.RESUME
+    return None
+
+
+def detect_social_intent(text: str) -> SocialIntent | None:
+    """Recognize complete social pleasantries without hijacking normal questions."""
+
+    normalized = _normalize(text)
+    if any(re.fullmatch(pattern, normalized) for pattern in _CLOSING_PATTERNS):
+        return SocialIntent.CLOSING
+    if any(re.fullmatch(pattern, normalized) for pattern in _THANKS_PATTERNS):
+        return SocialIntent.THANKS
     return None

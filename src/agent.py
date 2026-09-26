@@ -22,7 +22,12 @@ try:
 except ImportError:  # Optional in local development and unit tests.
     ai_coustics = None  # type: ignore[assignment]
 
-from digital_twin.commands import ConversationCommand, detect_command
+from digital_twin.commands import (
+    ConversationCommand,
+    SocialIntent,
+    detect_command,
+    detect_social_intent,
+)
 from digital_twin.knowledge import KnowledgeBase
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -86,6 +91,7 @@ class DigitalTwinAgent(Agent):
     ) -> None:
         transcript = new_message.text_content.strip()
         command = detect_command(transcript)
+        social_intent = detect_social_intent(transcript)
 
         if command is ConversationCommand.PAUSE:
             # A normal user turn should already have interrupted playback. Force
@@ -134,6 +140,20 @@ class DigitalTwinAgent(Agent):
                     "The conversation is already active. What would you like to know?",
                     add_to_chat_ctx=False,
                 )
+            raise StopResponse()
+
+        if social_intent is SocialIntent.CLOSING:
+            await self.session.say(
+                "It was nice talking with you too. Thanks for taking the time to chat with me!",
+                add_to_chat_ctx=False,
+            )
+            raise StopResponse()
+
+        if social_intent is SocialIntent.THANKS:
+            await self.session.say(
+                "You're very welcome.",
+                add_to_chat_ctx=False,
+            )
             raise StopResponse()
 
         if self._paused:

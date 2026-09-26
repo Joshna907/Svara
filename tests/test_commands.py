@@ -1,6 +1,11 @@
 import pytest
 
-from digital_twin.commands import ConversationCommand, detect_command
+from digital_twin.commands import (
+    ConversationCommand,
+    SocialIntent,
+    detect_command,
+    detect_social_intent,
+)
 
 
 @pytest.mark.parametrize(
@@ -49,3 +54,42 @@ def test_detects_resume_commands(utterance: str) -> None:
 )
 def test_does_not_trigger_on_normal_questions(utterance: str) -> None:
     assert detect_command(utterance) is None
+
+
+@pytest.mark.parametrize(
+    "utterance",
+    [
+        "Thanks, it was nice talking with you.",
+        "It was nice chatting with you",
+        "That was a great conversation",
+        "Thank you for this chat",
+        "It has been lovely speaking to you.",
+        "Goodbye",
+    ],
+)
+def test_detects_conversation_closing(utterance: str) -> None:
+    assert detect_social_intent(utterance) is SocialIntent.CLOSING
+
+
+@pytest.mark.parametrize(
+    "utterance",
+    [
+        "Thanks",
+        "Thank you very much",
+        "Thanks for your time",
+    ],
+)
+def test_detects_simple_thanks(utterance: str) -> None:
+    assert detect_social_intent(utterance) is SocialIntent.THANKS
+
+
+@pytest.mark.parametrize(
+    "utterance",
+    [
+        "Tell me about a chat application",
+        "What makes a good conversation design?",
+        "How did this project help you?",
+    ],
+)
+def test_social_intent_does_not_hijack_normal_questions(utterance: str) -> None:
+    assert detect_social_intent(utterance) is None
