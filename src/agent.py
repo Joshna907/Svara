@@ -73,6 +73,7 @@ class DigitalTwinAgent(Agent):
     def __init__(self, knowledge: KnowledgeBase, *, twin_name: str) -> None:
         super().__init__(instructions=BASE_INSTRUCTIONS.format(name=twin_name))
         self._knowledge = knowledge
+        self._twin_name = twin_name
         self._paused = False
         self._resume_interrupted_reply = False
 
@@ -145,7 +146,10 @@ class DigitalTwinAgent(Agent):
         if not transcript:
             raise StopResponse()
 
-        profile_context = self._knowledge.context_for(transcript)
+        profile_context = self._knowledge.context_for(
+            transcript,
+            owner_name=self._twin_name,
+        )
         if not profile_context:
             await self.session.say(
                 "I don't remember that well enough to answer it.",

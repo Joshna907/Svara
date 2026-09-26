@@ -42,10 +42,36 @@ def test_retrieves_relevant_project(profile: Path) -> None:
     assert "crop-disease classifier" in context
 
 
-def test_broad_self_introduction_uses_summary(profile: Path) -> None:
+@pytest.mark.parametrize(
+    "query",
+    [
+        "Tell me about yourself",
+        "Tell me more about yourself.",
+        "Tell me everything about you",
+    ],
+)
+def test_broad_self_introduction_uses_full_profile(profile: Path, query: str) -> None:
     knowledge = KnowledgeBase.from_markdown(profile)
-    context = knowledge.context_for("Tell me about yourself", limit=1)
+    context = knowledge.context_for(query, limit=1)
     assert "AI engineering student" in context
+    assert "crop-disease classifier" in context
+    assert "FastAPI" in context
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "Tell me more about Jothsana Waikar",
+        "Tell me more about Jyotsana Vaikar.",
+        "Who is Jotsana Waikar?",
+    ],
+)
+def test_owner_name_variants_use_full_profile(profile: Path, query: str) -> None:
+    knowledge = KnowledgeBase.from_markdown(profile)
+    context = knowledge.context_for(query, owner_name="Jothsana Waikar")
+    assert "AI engineering student" in context
+    assert "crop-disease classifier" in context
+    assert "FastAPI" in context
 
 
 @pytest.mark.parametrize(
